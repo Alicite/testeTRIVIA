@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia</title>
+</head>
+<body>
+    <h1>Trivia Questions</h1>
+    <div id="trivia-container">Loading trivia questions...</div>
+    <script>
+        let rightAnswers = 0;
+        const fetchData = async () => {
+            try {
+                const response = await fetch("https://opentdb.com/api.php?amount=3");
+                const data = await response.json();
+                console.log(data.results);
+                const container = document.getElementById('trivia-container');
+                container.innerHTML = '';
+                
+                for (const [index, item] of data.results.entries()) {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.innerHTML = `<h3>Q${index + 1}: ${item.question}</h3>`;
+                    container.appendChild(questionDiv);
+                    const answerDiv = document.createElement('div');
+                    const answers = [...item.incorrect_answers, item.correct_answer];
+                    answers.sort(() => Math.random() - 0.5);
+                    for (const answer of answers) {
+                        const answerBtn = document.createElement('button');
+                        answerBtn.innerText = answer;
+                        answerDiv.appendChild(answerBtn);
+                    }
+                    container.appendChild(answerDiv);
+                    
+                    await new Promise(resolve => {
+                        const buttons = answerDiv.querySelectorAll('button');
+                        buttons.forEach(button => {
+                            button.onclick = () => {
+                                if (button.innerText === item.correct_answer) {
+                                    alert('Correct!');
+                                    rightAnswers++;
+                                } else {
+                                    alert(`Wrong! The correct answer was: ${item.correct_answer}`);
+                                }
+                                container.innerHTML = '';
+                                resolve();
+                            };
+                        });
+                    });
+                }
+                container.innerHTML = `<h2>You got ${rightAnswers} out of ${data.results.length} correct!</h2>`;
+            } catch (error) {
+                console.error('Error fetching trivia:', error);
+            }
+        };
+        fetchData();
+    </script>
+</body>
+</html>
