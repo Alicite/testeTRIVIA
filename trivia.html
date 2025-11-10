@@ -26,7 +26,6 @@
             try {
                 const response = await fetch("https://opentdb.com/api.php?amount=3");
                 const data = await response.json();
-                console.log(data.results);
                 const container = document.getElementById('trivia-container');
                 container.innerHTML = '';
                 
