@@ -14,8 +14,8 @@ const translateData = async (text) => {
 const fetchData = async () => {
     try {
         const container = document.getElementById('trivia-container');
-        let categoria = '9'
-        let dificuldade = 'easy'
+        let categoria = '9';
+        let dificuldade = 'easy';
 
         // seleção da categoria
         await new Promise(resolve => {
@@ -23,11 +23,11 @@ const fetchData = async () => {
             botoesCat.forEach(botao => {
                 botao.onclick = () => {
                     if (botao.innerText === "Jogos"){
-                        categoria = '15'
+                        categoria = '15';
                     } else if (botao.innerText === "Esportes"){
-                        categoria = '21'
+                        categoria = '21';
                     }
-                    resolve()
+                    resolve();
                     container.innerHTML = 'Escolha a dificuldade:<br>';
                 };    
             });
@@ -35,48 +35,41 @@ const fetchData = async () => {
 
         // seleção da dificuldade
         await new Promise(resolve => {
-            const dificuldades = ['Fácil', 'Média', 'Difícil']
+            const dificuldades = ['Fácil', 'Média', 'Difícil'];
             dificuldades.forEach(dif => {
-                const selecionarHtml = document.createElement('button');
-                selecionarHtml.classList.add('botao-dif');
-                selecionarHtml.innerText = dif;
-                container.appendChild(selecionarHtml);
-            });
-
-            const botoesDif = document.querySelectorAll('.botao-dif');
-            botoesDif.forEach(botao => {
+                const botao = document.createElement('button');
+                botao.innerText = dif;
                 botao.onclick = () => {
                     if (botao.innerText === "Difícil"){
-                        dificuldade = 'hard'
+                        dificuldade = 'hard';
                     } else if (botao.innerText === "Média"){
-                        dificuldade = 'medium'
+                        dificuldade = 'medium';
                     }
-                    resolve()
+                    resolve();
                     container.innerHTML = '';
-                };    
+                }; 
+                container.appendChild(botao);
             });
         });
         
         const response = await fetch(`https://opentdb.com/api.php?amount=3&category=${categoria}&difficulty=${dificuldade}`);
         const data = await response.json();
-        console.log(data.results)
-        container.innerHTML = '';
         
         for (const [index, item] of data.results.entries()) {
             const questionDiv = document.createElement('div');
-            questionDiv.innerHTML = `<h3>Q${index + 1}: ${await translateData(item.question)}</h3>`;
+            questionDiv.innerHTML = `<h3>Q${index + 1}: ${decodeURIComponent(await translateData(item.question))}</h3>`;
             container.appendChild(questionDiv);
             const answerDiv = document.createElement('div');
             const answers = [...item.incorrect_answers, item.correct_answer];
             answers.sort(() => Math.random() - 0.5);
             for (const answer of answers) {
                 const answerBtn = document.createElement('button');
-                answerBtn.innerText = await translateData(answer);
+                answerBtn.innerText = decodeURIComponent(await translateData(answer));
                 answerDiv.appendChild(answerBtn);
             }
             container.appendChild(answerDiv);
 
-            const translatedCorrectAnswer = await translateData(item.correct_answer);
+            const translatedCorrectAnswer = decodeURIComponent(await translateData(item.correct_answer));
             
             await new Promise(resolve => {
                 const buttons = answerDiv.querySelectorAll('button');
