@@ -54,6 +54,8 @@ const fetchData = async () => {
         
         const response = await fetch(`https://opentdb.com/api.php?amount=3&category=${categoria}&difficulty=${dificuldade}`);
         const data = await response.json();
+        console.log(data.results)
+        container.innerHTML = '';
         
         for (const [index, item] of data.results.entries()) {
             const questionDiv = document.createElement('div');
@@ -87,7 +89,56 @@ const fetchData = async () => {
                 });
             });
         }
-        container.innerHTML = `<h2>You got ${rightAnswers} out of ${data.results.length} correct!</h2>`;
+
+        // exemplo de uso do localStorage
+        let username = 'Guest';
+
+        await new Promise((resolve) => {
+            const usernameInput = document.createElement('input');
+            usernameInput.type = 'text';
+            usernameInput.id = 'username-input';
+            usernameInput.placeholder = 'Insira o seu nome e depois pressione enter';
+            usernameInput.style.width = '90%';
+            usernameInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    username = event.target.value === '' ? username : event.target.value;
+                    resolve()
+                }
+            });
+            container.appendChild(usernameInput);
+        });
+
+        let users = [];
+        let user;
+        const savedUsers = localStorage.getItem('users')
+        if (!savedUsers) {
+            user = {
+                name: username,
+                record: rightAnswers
+            }
+            users.push(user)
+        } else {
+            users = JSON.parse(savedUsers);
+            usernames = users.map((user) => user.name);
+            
+            if (username in usernames){
+                users.forEach((user) => {
+                    if (user.name === username) {
+                        if (user.record < rightAnswers){
+                            user.record = rightAnswers;
+                        }
+                    }
+                });
+            } else {
+                users.push({
+                    name: username,
+                    record: rightAnswers
+                });
+            }
+        }
+        localStorage.setItem('users', JSON.stringify(users))
+
+        container.innerHTML = `<h2>Hi ${username !== '' ? username : 'Guest'}! You got ${rightAnswers} out of ${data.results.length} correct!</h2>`;
     } catch (error) {
         console.error('Error fetching trivia:', error);
     }
