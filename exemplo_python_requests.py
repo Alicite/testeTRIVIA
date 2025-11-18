@@ -24,7 +24,7 @@ def fetch_tradutor(text):
         return data[0][0]
     else:
         print(f"Error: Unable to fetch data (Status code: {response.status_code})")
-        return None
+        return html.unescape(text)
     
 # print(fetch_tradutor("Hello world!"))
 
